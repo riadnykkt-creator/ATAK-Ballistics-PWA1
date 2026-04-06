@@ -14,7 +14,7 @@ jobs:
       - name: Install PWABuilder CLI
         run: npm install -g @pwabuilder/cli
       - name: Build APK
-        run: pwabuilder https://tvuj-web-url.com --android
+        run: pwabuilder https://TvojeUživatelskéJméno.github.io/ATAK-Ballistics-PWA/ --android
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
