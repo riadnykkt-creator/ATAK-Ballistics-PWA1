@@ -1,0 +1,54 @@
+let map = L.map('map').setView([50.08, 14.43], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/…ap);
+
+let shooter, target, line;
+
+navigator.geolocation.getCurrentPosition(pos=>{
+    shooter = L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(map).bindPopup("Střelec").openPopup();
+    map.setView([pos.coords.latitude,pos.coords.longitude],14);
+});
+
+map.on('click', function(e){
+    if(target) map.removeLayer(target);
+    target = L.marker(e.latlng).addTo(map).bindPopup("Cíl");
+    drawLine();
+});
+
+function drawLine(){
+    if(!shooter||!target) return;
+    if(line) map.removeLayer(line);
+    line = L.polyline([shooter.getLatLng(),target.getLatLng()], {color:'lime'}).addTo(map);
+}
+
+function distance(a,b){
+    let R = 6371000;
+    let dLat=(b.lat-a.lat)*Math.PI/180;
+    let dLon=(b.lng-a.lng)*Math.PI/180;
+    let x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/…**2;
+    return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+async function getWeather(){
+    navigator.geolocation.getCurrentPosition(async pos=>{
+        let res=await fetch(`https://api.open-meteo.com/…rue`);
+        let data=await res.json();
+        document.getElementById("wind").value=data.current_weather.windspeed;
+    });
+}
+
+function calculate(){
+    if(!shooter||!target) return;
+    let dist=distance(shooter.getLatLng(),target.getLatLng());
+    let v0=parseFloat(document.getElementById("v0").value);
+    let wind=parseFloat(document.getElementById("wind").value);
+    let drop=(dist/v0)**2*9.81;
+    let drift=wind*(dist/v0);
+    let moa=(drop/dist)*3438;
+    let mrad=(drop/dist)*1000;
+    document.getElementById("output").innerHTML=
+        `Vzdálenost: ${dist.toFixed(0)} m<br>
+         Drop: ${drop.toFixed(2)} m<br>
+         Drift: ${drift.toFixed(2)} m<br>
+         MOA: ${moa.toFixed(2)}<br>
+         MRAD: ${mrad.toFixed(2)}`;
+}
